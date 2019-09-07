@@ -84,6 +84,10 @@ std::string shuffle_8(string bits, int rule)
         {
             result[i + 2] = bits[EP[i] - 1];
         }
+        else if (rule == 4)
+        {
+            result[i + 2] = bits[IP1[i] - 1];
+        }
     }
     return result.substr(2, 10);
 }
@@ -101,7 +105,7 @@ std::string shuffle_4(string bits, int rule)
     return result.substr(2, 6);
 }
 
-void funko(std::string text_IP_H1, std::string text_IP_H2, int KEY1) {
+std::string funko(std::string text_IP_H1, std::string text_IP_H2, int KEY1) {
     std::cout << "text_IP_Half : " << text_IP_H1 << std::endl;
 
     // Work with Half
@@ -150,9 +154,12 @@ void funko(std::string text_IP_H1, std::string text_IP_H2, int KEY1) {
     int baka_P4_H1 = baka_P4 ^ stoi(text_IP_H2, nullptr, 2);
     std::string baka_P4_H1_txt = bin_to_string(baka_P4_H1, 0);
     std::cout << "baka_P4_H1_txt : " << baka_P4_H1_txt << std::endl;
+
+    return  baka_P4_H1_txt.substr(6);
+
 }
 
-void init_encrypt()
+std::string init_encrypt()
 {
     std::string plain_text = "00101000";
     string key10 = "1100011110";
@@ -228,7 +235,11 @@ void init_encrypt()
 
     std::cout << " --------------- " << std::endl;
 
-    funko(baka_P4_H1_txt.substr(6), text_IP_H2, KEY2);
+    std::string endgame = baka_P4_H1_txt.substr(6) + funko(baka_P4_H1_txt.substr(6), text_IP_H2, KEY2);
+    std::cout << endgame << "\n";
+
+    std::cout << shuffle_8(endgame,4) << "\n";
+    return shuffle_8(endgame,4);
 }
 
 void tests()
@@ -247,7 +258,7 @@ void tests()
 
 int main()
 {
-    init_encrypt();
+    std::string cypher = init_encrypt();
     //tests();
     return 0;
 }
