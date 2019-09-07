@@ -16,12 +16,12 @@ const std::string S0[4][4] =
         {"11", "10", "01", "00"},
         {"00", "10", "01", "11"},
         {"11", "01", "11", "10"}};
-const int S1[4][4] =
+const std::string S1[4][4] =
     {
-        {0b0, 0b1, 0b10, 0b11},
-        {0b10, 0b0, 0b1, 0b11},
-        {0b11, 0b0, 0b1, 0b0},
-        {0b10, 0b1, 0b0, 0b11}};
+        {"00", "01", "10", "11"},
+        {"10", "00", "01", "11"},
+        {"11", "00", "01", "00"},
+        {"10", "01", "00", "11"}};
 /* END TABLES */
 
 // int | bin  to bin shape string
@@ -72,16 +72,84 @@ std::string shuffle_8(string bits, int rule)
     std::string result = "0000000000";
     for (int i = 0; i < 10; i++)
     {
-        if (rule == 1) {
+        if (rule == 1)
+        {
             result[i + 2] = bits[P8[i] - 1];
-        } else if(rule == 2) {
+        }
+        else if (rule == 2)
+        {
             result[i + 2] = bits[IP[i] - 1];
-        } else if(rule == 3) {
+        }
+        else if (rule == 3)
+        {
             result[i + 2] = bits[EP[i] - 1];
         }
-        
     }
-    return result.substr(2,10);
+    return result.substr(2, 10);
+}
+
+std::string shuffle_4(string bits, int rule)
+{
+    std::string result = "000000";
+    for (int i = 0; i < 4; i++)
+    {
+        if (rule == 1)
+        {
+            result[i + 2] = bits[P4[i] - 1];
+        }
+    }
+    return result.substr(2, 6);
+}
+
+void funko(std::string text_IP_H1, std::string text_IP_H2, int KEY1) {
+    std::cout << "text_IP_Half : " << text_IP_H1 << std::endl;
+
+    // Work with Half
+    std::string H1_EP = shuffle_8(text_IP_H1, 3);
+    std::cout << "H1 - EP : " << H1_EP << std::endl;
+
+    int H1_EP_bits = stoi(H1_EP, nullptr, 2);
+    std::string H1_EP_XOR_KEY_1 = bin_to_string(H1_EP_bits ^ KEY1, 2);
+    std::cout << "H1_EP_XOR_KEY_1 : " << H1_EP_XOR_KEY_1 << std::endl;
+
+    std::string x;
+    x += H1_EP_XOR_KEY_1[0];
+    x += +H1_EP_XOR_KEY_1[3];
+    int left = stoi(x, nullptr, 2);
+    std::cout << "x : " << left << "\n";
+
+    std::string y;
+    y += H1_EP_XOR_KEY_1[1];
+    y += +H1_EP_XOR_KEY_1[2];
+    int right = stoi(y, nullptr, 2);
+    std::cout << "y : " << right << "\n";
+
+    std::string left_part = S0[right][left];
+    std::cout << "left_part : " << left_part << "\n";
+
+    std::string x2;
+    x2 += H1_EP_XOR_KEY_1[4];
+    x2 += +H1_EP_XOR_KEY_1[7];
+    int left2 = stoi(x2, nullptr, 2);
+    std::cout << "x2 : " << left2 << "\n";
+
+    std::string y2;
+    y2 += H1_EP_XOR_KEY_1[5];
+    y2 += +H1_EP_XOR_KEY_1[6];
+    int right2 = stoi(y2, nullptr, 2);
+    std::cout << "y2 : " << right2 << "\n";
+
+    std::string baka = S0[left][right] + S1[left2][right2];
+
+    std::cout << "baka : " << baka << std::endl;
+
+    // PUNANI
+    int baka_P4 = stoi(shuffle_4(baka, 1), nullptr, 2);
+    std::cout << "shuffle_4(baka, 1) : " << shuffle_4(baka, 1) << std::endl;
+    std::cout << "text_IP_H2 : " << text_IP_H2 << std::endl;
+    int baka_P4_H1 = baka_P4 ^ stoi(text_IP_H2, nullptr, 2);
+    std::string baka_P4_H1_txt = bin_to_string(baka_P4_H1, 0);
+    std::cout << "baka_P4_H1_txt : " << baka_P4_H1_txt << std::endl;
 }
 
 void init_encrypt()
@@ -108,8 +176,8 @@ void init_encrypt()
     std::string text_IP = shuffle_8(plain_text, 2);
     std::cout << "Plan text - IP : " << text_IP << std::endl;
 
-    std::string text_IP_H1 = text_IP.substr(0,4);
-    std::string text_IP_H2 = text_IP.substr(4,8);
+    std::string text_IP_H1 = text_IP.substr(0, 4);
+    std::string text_IP_H2 = text_IP.substr(4, 8);
 
     // Work with H1
     std::string H1_EP = shuffle_8(text_IP_H1, 3);
@@ -121,29 +189,46 @@ void init_encrypt()
 
     std::string x;
     x += H1_EP_XOR_KEY_1[0];
-    x += + H1_EP_XOR_KEY_1[3];
+    x += +H1_EP_XOR_KEY_1[3];
     int left = stoi(x, nullptr, 2);
+    std::cout << "x : " << left << "\n";
 
     std::string y;
     y += H1_EP_XOR_KEY_1[1];
-    y += + H1_EP_XOR_KEY_1[2];
+    y += +H1_EP_XOR_KEY_1[2];
     int right = stoi(y, nullptr, 2);
+    std::cout << "y : " << right << "\n";
 
     std::string left_part = S0[left][right];
+    std::cout << "left_part : " << left_part << "\n";
 
     std::string x2;
-    x2 += H1_EP_XOR_KEY_1[0];
-    x2 += + H1_EP_XOR_KEY_1[3];
+    x2 += H1_EP_XOR_KEY_1[4];
+    x2 += +H1_EP_XOR_KEY_1[7];
     int left2 = stoi(x2, nullptr, 2);
+    std::cout << "x2 : " << left2 << "\n";
 
     std::string y2;
-    y2 += H1_EP_XOR_KEY_1[1];
-    y2 += + H1_EP_XOR_KEY_1[2];
+    y2 += H1_EP_XOR_KEY_1[5];
+    y2 += +H1_EP_XOR_KEY_1[6];
     int right2 = stoi(y2, nullptr, 2);
+    std::cout << "y2 : " << right2 << "\n";
 
-    std::string nosequeberga = S0[left][right] + S0[left2][right2];
+    std::string baka = S0[left][right] + S1[left2][right2];
 
-    std::cout << "nosequeberga : " << nosequeberga << std::endl;
+    std::cout << "baka : " << baka << std::endl;
+
+    // PUNANI
+    int baka_P4 = stoi(shuffle_4(baka, 1), nullptr, 2);
+    std::cout << "shuffle_4(baka, 1) : " << shuffle_4(baka, 1) << std::endl;
+    std::cout << "text_IP_H1 : " << text_IP_H1 << std::endl;
+    int baka_P4_H1 = baka_P4 ^ stoi(text_IP_H1, nullptr, 2);
+    std::string baka_P4_H1_txt = bin_to_string(baka_P4_H1, 0);
+    std::cout << "baka_P4_H1_txt : " << baka_P4_H1_txt << std::endl;
+
+    std::cout << " --------------- " << std::endl;
+
+    funko(baka_P4_H1_txt.substr(6), text_IP_H2, KEY2);
 }
 
 void tests()
