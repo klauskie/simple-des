@@ -21,26 +21,17 @@ const std::string S1[4][4] =
                 {"10", "01", "00", "11"}};
 /* END TABLES */
 
-// int | bin  to bin shape string
-std::string bin_to_string(int bits, int cut = 0)
-{
-    std::string bin_string = "0000000000";
-    short count = 10;
-    while (bits)
-    {
-        count--;
-        if (bits & 1)
-        {
-            bin_string[count] = '1';
-        }
-        else
-        {
-            bin_string[count] = '0';
-        }
-        bits >>= 1;
-    }
 
-    return bin_string.substr(cut, bin_string.size());
+std::string exor(std::string top, std::string bottom) {
+    std::string result = top;
+    for(int i = 0; i < top.size(); i++){
+        if (top[i] == bottom[i]) {
+            result[i] = '0';
+        } else {
+            result[i] = '1';
+        }
+    }
+    return result;
 }
 
 std::string left_shift(std::string bits)
@@ -55,7 +46,7 @@ std::string left_shift(std::string bits)
 
 std::string shuffle_10(std::string bits)
 {
-    std::string result = "0000000000";
+    std::string result = bits;
     for (int i = 0; i < 10; i++)
     {
         result[i] = bits[P10[i] - 1];
@@ -101,64 +92,63 @@ std::string shuffle_4(std::string bits, int rule)
     return result.substr(2, 6);
 }
 
-std::string funko(const std::string& text_WORKABLE, const std::string& text_EXTRA, int KEY) {
-    //std::cout << "text_IP_Half : " << text_WORKABLE << std::endl;
+std::string funko(const std::string& text_WORKABLE, const std::string& text_EXTRA, const std::string& KEY, bool comments = false) {
 
     // Work with Half
     std::string H1_EP = shuffle_8(text_WORKABLE, 3);
-    //std::cout << "H1 - EP : " << H1_EP << std::endl;
+    if (comments) {
+        std::cout << "Half -> EP : " << H1_EP << "\n";
+    }
 
-    int H1_EP_bits = stoi(H1_EP, nullptr, 2);
-    std::string H1_EP_XOR_KEY_1 = bin_to_string(H1_EP_bits ^ KEY, 2);
-    //std::cout << "H1_EP_XOR_KEY_1 : " << H1_EP_XOR_KEY_1 << std::endl;
+    std::string H1_EP_XOR_KEY_1 = exor(H1_EP,KEY);
+    if (comments) {
+        std::cout << "Half -> EP X KEY : " << H1_EP_XOR_KEY_1 << "\n";
+    }
 
     std::string x;
     x += H1_EP_XOR_KEY_1[0];
     x += H1_EP_XOR_KEY_1[3];
     int left = stoi(x, nullptr, 2);
-    //std::cout << "x : " << left << "\n";
 
     std::string y;
     y += H1_EP_XOR_KEY_1[1];
     y += H1_EP_XOR_KEY_1[2];
     int right = stoi(y, nullptr, 2);
-    //std::cout << "y : " << right << "\n";
 
     std::string x2;
     x2 += H1_EP_XOR_KEY_1[4];
     x2 += H1_EP_XOR_KEY_1[7];
     int left2 = stoi(x2, nullptr, 2);
-    //std::cout << "x2 : " << left2 << "\n";
 
     std::string y2;
     y2 += H1_EP_XOR_KEY_1[5];
     y2 += H1_EP_XOR_KEY_1[6];
     int right2 = stoi(y2, nullptr, 2);
-    //std::cout << "y2 : " << right2 << "\n";
 
-    std::string baka = S0[left][right] + S1[left2][right2];
+    std::string s0s1 = S0[left][right] + S1[left2][right2];
+    if (comments) {
+        std::cout << "S0 = ( " << left << ", " << right << ") : S1 = ( " << left2 << ", " << right2 << ")\n";
+        std::cout << "S0 + S1 : " << s0s1 << "\n";
+    }
 
-    //std::cout << "baka : " << baka << std::endl;
+    std::string s0s1_P4 = shuffle_4(s0s1, 1);
+    if (comments) {
+        std::cout << "S0S1 -> P4 : " << s0s1_P4 << "\n";
+    }
 
-    // PUNANI
-    int baka_P4 = stoi(shuffle_4(baka, 1), nullptr, 2);
-    //std::cout << "shuffle_4(baka, 1) : " << shuffle_4(baka, 1) << std::endl;
-    //std::cout << "text_EXTRA : " << text_EXTRA << std::endl;
-    int baka_P4_H1 = baka_P4 ^ stoi(text_EXTRA, nullptr, 2);
-    std::string baka_P4_H1_txt = bin_to_string(baka_P4_H1, 0);
-    //std::cout << "baka_P4_H1_txt : " << baka_P4_H1_txt << std::endl;
+    std::string s0s1_P4_H1_txt = exor(s0s1_P4, text_EXTRA);
 
-    return  baka_P4_H1_txt.substr(6);
+    return  s0s1_P4_H1_txt;
 
 }
 
-std::string init_encrypt(const std::string& key10, const std::string& plain_text)
+std::string init_encrypt(const std::string& key10, const std::string& plain_text, bool comments = false)
 {
 
     // GET KEYS
     std::string key10_mutaded_ls = left_shift(shuffle_10(key10));
 
-    int KEY1 = stoi(shuffle_8(key10_mutaded_ls, 1), nullptr, 2);
+    std::string KEY1 = shuffle_8(key10_mutaded_ls, 1);
 
     std::string key10_h1_str = key10_mutaded_ls.substr(0, 5);
     std::string key10_h2_str = key10_mutaded_ls.substr(5, 10);
@@ -166,24 +156,34 @@ std::string init_encrypt(const std::string& key10, const std::string& plain_text
     std::string key10_h1_l2 = left_shift(left_shift(key10_h1_str));
     std::string key10_h2_l2 = left_shift(left_shift(key10_h2_str));
 
-    int KEY2 = stoi(shuffle_8(key10_h1_l2 + key10_h2_l2, 1), nullptr, 2);
+    std::string KEY2 = shuffle_8(key10_h1_l2 + key10_h2_l2, 1);
 
-    //std::cout << "KEY 1 : " << bin_to_string(KEY1) << " | KEY 2 : " << bin_to_string(KEY2) << std::endl;
+    if (comments) {
+        std::cout << "KEY 1 : " << KEY1 << " | KEY 2 : " << KEY2 << "\n";
+    }
+
 
     // ENCRYPT
     std::string text_IP = shuffle_8(plain_text, 2);
-    //std::cout << "Plan text - IP : " << text_IP << std::endl;
+    if (comments) {
+        std::cout << "Plan text -> IP : " << text_IP << "\n";
+    }
 
     std::string text_IP_H1 = text_IP.substr(0, 4);
     std::string text_IP_H2 = text_IP.substr(4, 8);
 
     // Work with H1
-    std::string moist = funko(text_IP_H2,text_IP_H1, KEY1);
+    if (comments) {
+        std::cout << " Half 1: \n";
+    }
+    std::string moist = funko(text_IP_H2,text_IP_H1, KEY1, comments);
 
-    //std::cout << " --------------- " << std::endl;
+    if (comments) {
+        std::cout << " ---------------\n";
+        std::cout << " Half 2: \n";
+    }
 
-    std::string endgame = funko(moist, text_IP_H2, KEY2) + moist;
-    //std::cout << endgame << "\n";
+    std::string endgame = funko(moist, text_IP_H2, KEY2, comments) + moist;
 
     return shuffle_8(endgame,4);
 }
@@ -197,8 +197,8 @@ int main()
     std::string plain_text = "00001011";
     std::string key = "1001100100";
 
-    std::string cypher = init_encrypt(key, plain_text);
-    std::cout << cypher << "\n";
+    std::string cypher = init_encrypt(key, plain_text, true);
+    std::cout << "CYPHER : " << cypher << "\n";
 
     return 0;
 }
