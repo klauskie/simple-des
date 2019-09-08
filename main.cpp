@@ -21,6 +21,26 @@ const std::string S1[4][4] =
                 {"10", "01", "00", "11"}};
 /* END TABLES */
 
+std::string int_to_string(int bits, int cut = 0)
+{
+    std::string bin_string = "0000000000";
+    short count = 10;
+    while (bits)
+    {
+        count--;
+        if (bits & 1)
+        {
+            bin_string[count] = '1';
+        }
+        else
+        {
+            bin_string[count] = '0';
+        }
+        bits >>= 1;
+    }
+
+    return bin_string.substr(cut, bin_string.size());
+}
 
 std::string exor(std::string top, std::string bottom) {
     std::string result = top;
@@ -210,22 +230,32 @@ std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& 
 
 }
 
+void generateKeys() {
+    for(int i = 0; i < 1024; i++) {
+        // call encrypt
+        // check for matches
+        std::cout << int_to_string(i) << "\n";
+    }
+}
 
 int main()
 {
-    std::string plain_text = "00101000";
-    std::string key = "1100011110";
+    bool normal = false;
 
-    //std::string plain_text = "00001011";
-    //std::string key = "1001100100";
+    if (normal) {
+        std::string plain_text = "00101000";
+        std::string key = "1100011110";
 
-    std::string cypher = FLDSMDFR(true, key, plain_text, true);
-    std::cout << "CYPHER : " << cypher << "\n";
+        std::string cypher = FLDSMDFR(true, key, plain_text, true);
+        std::cout << "CYPHER : " << cypher << "\n";
 
-    std::cout << "\n\n";
+        std::cout << "\n\n";
 
-    std::string plain = FLDSMDFR(false, key, cypher, true);
-    std::cout << "Plain text : " << plain << "\n";
+        std::string plain = FLDSMDFR(false, key, cypher, true);
+        std::cout << "Plain text : " << plain << "\n";
+    } else {
+        generateKeys();
+    }
 
     return 0;
 }
