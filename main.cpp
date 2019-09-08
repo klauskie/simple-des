@@ -142,13 +142,14 @@ std::string funko(const std::string& text_WORKABLE, const std::string& text_EXTR
 
 }
 
-std::string init_encrypt(const std::string& key10, const std::string& plain_text, bool comments = false)
-{
-
-    // GET KEYS
+std::string getKEY1(std::string key10) {
     std::string key10_mutaded_ls = left_shift(shuffle_10(key10));
 
-    std::string KEY1 = shuffle_8(key10_mutaded_ls, 1);
+    return shuffle_8(key10_mutaded_ls, 1);
+}
+
+std::string getKEY2(std::string key10) {
+    std::string key10_mutaded_ls = left_shift(shuffle_10(key10));
 
     std::string key10_h1_str = key10_mutaded_ls.substr(0, 5);
     std::string key10_h2_str = key10_mutaded_ls.substr(5, 10);
@@ -156,7 +157,15 @@ std::string init_encrypt(const std::string& key10, const std::string& plain_text
     std::string key10_h1_l2 = left_shift(left_shift(key10_h1_str));
     std::string key10_h2_l2 = left_shift(left_shift(key10_h2_str));
 
-    std::string KEY2 = shuffle_8(key10_h1_l2 + key10_h2_l2, 1);
+    return shuffle_8(key10_h1_l2 + key10_h2_l2, 1);
+}
+
+std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& plain_text, bool comments = false)
+{
+
+    // GET KEYS
+    std::string KEY1 = getKEY1(key10);
+    std::string KEY2 = getKEY2(key10);
 
     if (comments) {
         std::cout << "KEY 1 : " << KEY1 << " | KEY 2 : " << KEY2 << "\n";
@@ -166,7 +175,7 @@ std::string init_encrypt(const std::string& key10, const std::string& plain_text
     // ENCRYPT
     std::string text_IP = shuffle_8(plain_text, 2);
     if (comments) {
-        std::cout << "Plan text -> IP : " << text_IP << "\n";
+        std::cout << "text -> IP : " << text_IP << "\n";
     }
 
     std::string text_IP_H1 = text_IP.substr(0, 4);
@@ -176,29 +185,47 @@ std::string init_encrypt(const std::string& key10, const std::string& plain_text
     if (comments) {
         std::cout << " Half 1: \n";
     }
-    std::string moist = funko(text_IP_H2,text_IP_H1, KEY1, comments);
+
+    // init moist to store first part
+    std::string moist;
+
+    if (encrypt) {
+        moist = funko(text_IP_H2,text_IP_H1, KEY1, comments);
+    } else {
+        moist = funko(text_IP_H2,text_IP_H1, KEY2, comments);
+    }
 
     if (comments) {
         std::cout << " ---------------\n";
         std::cout << " Half 2: \n";
     }
 
-    std::string endgame = funko(moist, text_IP_H2, KEY2, comments) + moist;
+    if (encrypt) {
+        std::string endgame = funko(moist, text_IP_H2, KEY2, comments) + moist;
+        return shuffle_8(endgame,4);
+    } else {
+        std::string endgame = funko(moist, text_IP_H2, KEY1, comments) + moist;
+        return shuffle_8(endgame,4);
+    }
 
-    return shuffle_8(endgame,4);
 }
 
 
 int main()
 {
-    //std::string plain_text = "00101000";
-    //std::string key = "1100011110";
+    std::string plain_text = "00101000";
+    std::string key = "1100011110";
 
-    std::string plain_text = "00001011";
-    std::string key = "1001100100";
+    //std::string plain_text = "00001011";
+    //std::string key = "1001100100";
 
-    std::string cypher = init_encrypt(key, plain_text, true);
+    std::string cypher = FLDSMDFR(true, key, plain_text, true);
     std::cout << "CYPHER : " << cypher << "\n";
+
+    std::cout << "\n\n";
+
+    std::string plain = FLDSMDFR(false, key, cypher, true);
+    std::cout << "Plain text : " << plain << "\n";
 
     return 0;
 }
