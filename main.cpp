@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <map>
 
 /* TABLES */
 const int P10[10] = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
@@ -231,27 +232,47 @@ std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& 
 
 }
 
-void generateKeys() {
+int generateKeys(std::map<std::string, std::string> babel) {
+    std::string posibleKey;
+    int success = 0;
+    std::map<std::string, std::string>::iterator it;
+
     for(int i = 0; i < 1024; i++) {
         // call encrypt
         // check for matches
-        std::cout << int_to_string(i) << "\n";
+        posibleKey = int_to_string(i);
+
+        for( it = babel.begin(); it != babel.end(); ++it )
+        {
+            if (it->second == FLDSMDFR(true, posibleKey, it->first)) {
+                success++;
+                babel.erase(it);
+                std::cout << posibleKey << "\n";
+            }
+
+        }
     }
+    return success;
 }
 
-void readFile() {
+std::map<std::string, std::string> readFile() {
     std::string line;
     std::ifstream myfile("alberto.txt");
+
+    std::map<std::string, std::string> babel;
+
     if (myfile.is_open())
     {
         while (myfile.good())
         {
             getline(myfile, line);
-            
-            std::cout << line.substr(0,8) << " : " << line.substr(9,16) << "\n";
+            babel[line.substr(0,8)] = line.substr(9,16);
+            //babel.insert(line.substr(0,8), line.substr(9,16));
         }
         myfile.close();
     }
+
+    return babel;
 }
 
 int main()
@@ -270,7 +291,8 @@ int main()
         std::string plain = FLDSMDFR(false, key, cypher, true);
         std::cout << "Plain text : " << plain << "\n";
     } else {
-        readFile();
+        std::map<std::string, std::string> babel = readFile();
+        std::cout << generateKeys(babel) << "\n";
     }
 
     return 0;
