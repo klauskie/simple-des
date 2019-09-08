@@ -11,17 +11,17 @@ const int IP1[8] = {4, 1, 3, 5, 7, 2, 8, 6};
 const int EP[8] = {4, 1, 2, 3, 2, 3, 4, 1};
 const int P4[4] = {2, 4, 3, 1};
 const std::string S0[4][4] =
-        {
-                {"01", "00", "11", "10"},
-                {"11", "10", "01", "00"},
-                {"00", "10", "01", "11"},
-                {"11", "01", "11", "10"}};
+    {
+        {"01", "00", "11", "10"},
+        {"11", "10", "01", "00"},
+        {"00", "10", "01", "11"},
+        {"11", "01", "11", "10"}};
 const std::string S1[4][4] =
-        {
-                {"00", "01", "10", "11"},
-                {"10", "00", "01", "11"},
-                {"11", "00", "01", "00"},
-                {"10", "01", "00", "11"}};
+    {
+        {"00", "01", "10", "11"},
+        {"10", "00", "01", "11"},
+        {"11", "00", "01", "00"},
+        {"10", "01", "00", "11"}};
 /* END TABLES */
 
 // int | bin  to bin shape string
@@ -105,7 +105,8 @@ std::string shuffle_4(string bits, int rule)
     return result.substr(2, 6);
 }
 
-std::string funko(std::string text_WORKABLE, std::string text_EXTRA, int KEY) {
+std::string funko(std::string text_WORKABLE, std::string text_EXTRA, int KEY)
+{
     std::cout << "text_IP_Half : " << text_WORKABLE << std::endl;
 
     // Work with Half
@@ -155,13 +156,11 @@ std::string funko(std::string text_WORKABLE, std::string text_EXTRA, int KEY) {
     std::string baka_P4_H1_txt = bin_to_string(baka_P4_H1, 0);
     std::cout << "baka_P4_H1_txt : " << baka_P4_H1_txt << std::endl;
 
-    return  baka_P4_H1_txt.substr(6);
-
+    return baka_P4_H1_txt.substr(6);
 }
 
 std::string init_encrypt(std::string key10, std::string plain_text)
 {
-
 
     // GET KEYS
     std::string key10_mutaded_ls = left_shift(shuffle_10(key10));
@@ -186,17 +185,16 @@ std::string init_encrypt(std::string key10, std::string plain_text)
     std::string text_IP_H2 = text_IP.substr(4, 8);
 
     // Work with H1
-    std::string moist = funko(text_IP_H2,text_IP_H1, KEY1);
+    std::string moist = funko(text_IP_H2, text_IP_H1, KEY1);
 
     std::cout << " --------------- " << std::endl;
 
     std::string endgame = funko(moist, text_IP_H2, KEY2) + moist;
     std::cout << endgame << "\n";
 
-    std::cout << shuffle_8(endgame,4) << "\n";
-    return shuffle_8(endgame,4);
+    std::cout << shuffle_8(endgame, 4) << "\n";
+    return shuffle_8(endgame, 4);
 }
-
 
 int main()
 {
