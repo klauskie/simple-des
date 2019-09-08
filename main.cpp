@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 
 /* TABLES */
 const int P10[10] = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
@@ -238,6 +239,21 @@ void generateKeys() {
     }
 }
 
+void readFile() {
+    std::string line;
+    std::ifstream myfile("alberto.txt");
+    if (myfile.is_open())
+    {
+        while (myfile.good())
+        {
+            getline(myfile, line);
+            
+            std::cout << line.substr(0,8) << " : " << line.substr(9,16) << "\n";
+        }
+        myfile.close();
+    }
+}
+
 int main()
 {
     bool normal = false;
@@ -254,7 +270,7 @@ int main()
         std::string plain = FLDSMDFR(false, key, cypher, true);
         std::cout << "Plain text : " << plain << "\n";
     } else {
-        generateKeys();
+        readFile();
     }
 
     return 0;
