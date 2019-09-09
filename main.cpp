@@ -232,7 +232,7 @@ std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& 
 
 }
 
-int generateKeys(std::vector<std::pair<std::string, std::string> > list) {
+int generateKeys(std::vector<std::pair<std::string, std::string> >& list) {
     std::string posibleKey;
     int success = 0;
     int total = 0;
