@@ -224,9 +224,11 @@ std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& 
 
     if (encrypt) {
         std::string endgame = funko(moist, text_IP_H2, KEY2, comments) + moist;
+        std::cout << "\nCypher text : " << endgame << "\n";
         return shuffle_8(endgame,4);
     } else {
         std::string endgame = funko(moist, text_IP_H2, KEY1, comments) + moist;
+        std::cout << "\nPlain text : " << endgame << "\n";
         return shuffle_8(endgame,4);
     }
 
@@ -321,7 +323,7 @@ std::vector<std::pair<std::string, std::string> > readFile() {
 
 int main()
 {
-    bool normal = false;
+    bool normal = true;
 
     if (normal) {
         std::string text;
@@ -341,7 +343,7 @@ int main()
                 std::cout << "Enter your key: ";
                 std::cin >> key;
 
-                std::cout << "CYPHER : " << FLDSMDFR(true, key, text, true) << "\n";
+                FLDSMDFR(true, key, text, true);
                 break;
             case 2:
                 // decrypt
@@ -352,7 +354,7 @@ int main()
                 std::cout << "Enter your key: ";
                 std::cin >> key;
 
-                std::cout << "ORIGINAL : " << FLDSMDFR(false, key, text, true) << "\n";
+                FLDSMDFR(false, key, text, true);
                 break;
             default:
                 std::cout << "wrong number.\n";
