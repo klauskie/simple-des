@@ -164,13 +164,13 @@ std::string funko(const std::string& text_WORKABLE, const std::string& text_EXTR
 
 }
 
-std::string getKEY1(std::string key10) {
+std::string getKEY1(const std::string& key10) {
     std::string key10_mutaded_ls = left_shift(shuffle_10(key10));
 
     return shuffle_8(key10_mutaded_ls, 1);
 }
 
-std::string getKEY2(std::string key10) {
+std::string getKEY2(const std::string& key10) {
     std::string key10_mutaded_ls = left_shift(shuffle_10(key10));
 
     std::string key10_h1_str = key10_mutaded_ls.substr(0, 5);
@@ -232,9 +232,40 @@ std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& 
 
 }
 
-int generateKeys(std::vector<std::pair<std::string, std::string> >& list) {
+std::vector<std::pair<std::string, std::string> > generateKeys(std::vector<std::pair<std::string, std::string> >& list) {
     std::string posibleKey;
     int success = 0;
+    int total = 0;
+    std::vector<std::pair<std::string, std::string> > keysTexts;
+
+    for(int i = 0; i < 1024; i++) {
+        posibleKey = int_to_string(i);
+
+        if (list.size() == 0) {
+            break;
+        }
+
+        for(int j = 0; j < list.size(); j++) {
+
+            if (list[j].second == FLDSMDFR(true, posibleKey, list[j].first)) {
+                list.erase(list.begin() + j - 1);
+                success++;
+                keysTexts.push_back(std::make_pair(posibleKey, list[j].first));
+            }
+            total++;
+        }
+
+    }
+
+
+    std::cout << "Total iterations : " << total << "\n";
+
+    return keysTexts;
+}
+
+std::string generateUniqueKey(std::vector<std::pair<std::string, std::string> >& list) {
+    std::string posibleKey;
+    int count = 0;
     int total = 0;
 
     for(int i = 0; i < 1024; i++) {
@@ -247,23 +278,27 @@ int generateKeys(std::vector<std::pair<std::string, std::string> >& list) {
         for(int j = 0; j < list.size(); j++) {
 
             if (list[j].second == FLDSMDFR(true, posibleKey, list[j].first)) {
-                list.erase((list.begin() + j - 1));
-                success++;
+                count++;
+            }
+            if (count == list.size()) {
+                // key found
+                std::cout << "KEY : " << posibleKey << "\n";
+                return posibleKey;
             }
             total++;
         }
+        count = 0;
 
     }
 
-
     std::cout << "Total iterations : " << total << "\n";
 
-    return success;
+    return "error";
 }
 
 std::vector<std::pair<std::string, std::string> > readFile() {
     std::string line;
-    std::ifstream myfile("/Users/klauskie/Documents/Tec/Homework/Semestre_7/Seguridad_informatica/S-DES/alberto.txt");
+    std::ifstream myfile("alberto.txt");
 
     std::vector<std::pair<std::string, std::string> > list;
 
@@ -271,10 +306,8 @@ std::vector<std::pair<std::string, std::string> > readFile() {
 
     if (myfile.is_open())
     {
-        while (myfile.good())
+        while (getline(myfile, line))
         {
-            getline(myfile, line);
-
             list.push_back(std::make_pair(line.substr(0,8), line.substr(9,16)));
             count++;
         }
@@ -291,19 +324,49 @@ int main()
     bool normal = false;
 
     if (normal) {
-        std::string plain_text = "00001010";
-        std::string key = "0000000000";
+        std::string text;
+        std::string key;
+        short batman;
 
-        std::string cypher = FLDSMDFR(true, key, plain_text, true);
-        std::cout << "CYPHER : " << cypher << "\n";
+        std::cout << "Enter 1 to encrypt. 2 to decrypt :";
+        std::cin >> batman;
 
-        std::cout << "\n\n";
+        switch (batman) {
+            case 1:
+                // encrypt
+                std::cout << "Encrypt\n";
+                std::cout << "Enter your plain text: ";
+                std::cin >> text;
 
-        std::string plain = FLDSMDFR(false, key, cypher, true);
-        std::cout << "Plain text : " << plain << "\n";
+                std::cout << "Enter your key: ";
+                std::cin >> key;
+
+                std::cout << "CYPHER : " << FLDSMDFR(true, key, text, true) << "\n";
+                break;
+            case 2:
+                // decrypt
+                std::cout << "Decrypt\n";
+                std::cout << "Enter your cypher text: ";
+                std::cin >> text;
+
+                std::cout << "Enter your key: ";
+                std::cin >> key;
+
+                std::cout << "ORIGINAL : " << FLDSMDFR(false, key, text, true) << "\n";
+                break;
+            default:
+                std::cout << "wrong number.\n";
+                break;
+        }
     } else {
         std::vector<std::pair<std::string, std::string> > list = readFile();
-        generateKeys(list);
+        //std::vector<std::pair<std::string, std::string>> result = generateKeys(list);
+        std::string result = generateUniqueKey(list);
+
+//        for(auto x : result) {
+//            std::cout << "Key : " << x.first << " | plain text : " << x.second << "\n";
+//        }
+
     }
 
     return 0;
