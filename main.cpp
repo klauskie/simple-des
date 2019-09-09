@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <map>
 #include <vector>
 
 /* TABLES */
@@ -233,10 +232,9 @@ std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& 
 
 }
 
-int generateKeys(std::vector<std::pair<std::string, std::string>> list) {
+int generateKeys(std::vector<std::pair<std::string, std::string> > list) {
     std::string posibleKey;
     int success = 0;
-    int ogSize = list.size();
     int total = 0;
 
     for(int i = 0; i < 1024; i++) {
@@ -246,10 +244,10 @@ int generateKeys(std::vector<std::pair<std::string, std::string>> list) {
             break;
         }
 
-        for(int i = 0; i < list.size(); i++) {
+        for(int j = 0; j < list.size(); j++) {
 
-            if (list[i].second == FLDSMDFR(true, posibleKey, list[i].first)) {
-                list.erase((list.begin() + i - 1));
+            if (list[j].second == FLDSMDFR(true, posibleKey, list[j].first)) {
+                list.erase((list.begin() + j - 1));
                 success++;
             }
             total++;
@@ -259,16 +257,15 @@ int generateKeys(std::vector<std::pair<std::string, std::string>> list) {
 
 
     std::cout << "Total iterations : " << total << "\n";
-    std::cout << ogSize << " : " << list.size() << " | Success : " << success << "\n";
 
     return success;
 }
 
-std::vector<std::pair<std::string, std::string>> readFile() {
+std::vector<std::pair<std::string, std::string> > readFile() {
     std::string line;
     std::ifstream myfile("/Users/klauskie/Documents/Tec/Homework/Semestre_7/Seguridad_informatica/S-DES/alberto.txt");
 
-    std::vector<std::pair<std::string, std::string>> list;
+    std::vector<std::pair<std::string, std::string> > list;
 
     int count = 0;
 
@@ -278,7 +275,7 @@ std::vector<std::pair<std::string, std::string>> readFile() {
         {
             getline(myfile, line);
 
-            list.emplace_back(std::make_pair(line.substr(0,8), line.substr(9,16)));
+            list.push_back(std::make_pair(line.substr(0,8), line.substr(9,16)));
             count++;
         }
         myfile.close();
@@ -288,22 +285,6 @@ std::vector<std::pair<std::string, std::string>> readFile() {
 
 }
 
-void testFL(std::map<std::string, std::string> babel) {
-    std::string posibleKey = "1001100100";
-    int count = 0;
-
-    std::cout << "map size : " << babel.size() << "\n";
-
-    for( auto it = babel.begin(); it != babel.end(); ++it )
-    {
-        if (it->second == FLDSMDFR(true, posibleKey, it->first)) {
-            babel.erase(it);
-            count++;
-        }
-    }
-    std::cout << "map size : " << babel.size() << "\n";
-    std::cout << count << "\n";
-}
 
 int main()
 {
@@ -321,7 +302,7 @@ int main()
         std::string plain = FLDSMDFR(false, key, cypher, true);
         std::cout << "Plain text : " << plain << "\n";
     } else {
-        std::vector<std::pair<std::string, std::string>> list = readFile();
+        std::vector<std::pair<std::string, std::string> > list = readFile();
         generateKeys(list);
     }
 
