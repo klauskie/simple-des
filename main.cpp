@@ -1,6 +1,6 @@
 #include <iostream>
 #include <fstream>
-#include <map>
+#include <vector>
 
 /* TABLES */
 const int P10[10] = {3, 5, 2, 7, 4, 10, 1, 9, 8, 6};
@@ -232,56 +232,67 @@ std::string FLDSMDFR(bool encrypt, const std::string& key10, const std::string& 
 
 }
 
-int generateKeys(std::map<std::string, std::string> babel) {
+int generateKeys(std::vector<std::pair<std::string, std::string> >& list) {
     std::string posibleKey;
     int success = 0;
-    std::map<std::string, std::string>::iterator it;
+    int total = 0;
 
     for(int i = 0; i < 1024; i++) {
-        // call encrypt
-        // check for matches
         posibleKey = int_to_string(i);
 
-        for( it = babel.begin(); it != babel.end(); ++it )
-        {
-            if (it->second == FLDSMDFR(true, posibleKey, it->first)) {
-                success++;
-                babel.erase(it);
-                std::cout << posibleKey << "\n";
-            }
-
+        if (list.size() == 0) {
+            break;
         }
+
+        for(int j = 0; j < list.size(); j++) {
+
+            if (list[j].second == FLDSMDFR(true, posibleKey, list[j].first)) {
+                list.erase((list.begin() + j - 1));
+                success++;
+            }
+            total++;
+        }
+
     }
+
+
+    std::cout << "Total iterations : " << total << "\n";
+
     return success;
 }
 
-std::map<std::string, std::string> readFile() {
+std::vector<std::pair<std::string, std::string> > readFile() {
     std::string line;
-    std::ifstream myfile("alberto.txt");
+    std::ifstream myfile("/Users/klauskie/Documents/Tec/Homework/Semestre_7/Seguridad_informatica/S-DES/alberto.txt");
 
-    std::map<std::string, std::string> babel;
+    std::vector<std::pair<std::string, std::string> > list;
+
+    int count = 0;
 
     if (myfile.is_open())
     {
         while (myfile.good())
         {
             getline(myfile, line);
-            babel[line.substr(0,8)] = line.substr(9,16);
-            //babel.insert(line.substr(0,8), line.substr(9,16));
+
+            list.push_back(std::make_pair(line.substr(0,8), line.substr(9,16)));
+            count++;
         }
         myfile.close();
     }
 
-    return babel;
+    return list;
+
 }
+
 
 int main()
 {
     bool normal = false;
 
     if (normal) {
-        std::string plain_text = "00101000";
-        std::string key = "1100011110";
+        std::string plain_text = "00001010";
+        std::string key = "0000000000";
 
         std::string cypher = FLDSMDFR(true, key, plain_text, true);
         std::cout << "CYPHER : " << cypher << "\n";
@@ -291,8 +302,8 @@ int main()
         std::string plain = FLDSMDFR(false, key, cypher, true);
         std::cout << "Plain text : " << plain << "\n";
     } else {
-        std::map<std::string, std::string> babel = readFile();
-        std::cout << generateKeys(babel) << "\n";
+        std::vector<std::pair<std::string, std::string> > list = readFile();
+        generateKeys(list);
     }
 
     return 0;
